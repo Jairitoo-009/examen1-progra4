@@ -5,6 +5,7 @@ import { useGetAll } from '../hooks/useGetAll';
 const CarParts = () => {
   const { data, loading, error } = useGetAll();
   const [visibleCount, setVisibleCount] = useState(10);
+  const [searchTerm, setSearchTerm] = useState('');
 
   if (loading) {
     return <p>Cargando piezas...</p>;
@@ -14,17 +15,34 @@ const CarParts = () => {
     return <p>Error: {error}</p>;
   }
 
+  
+  const datosFiltrados = data?.filter((item) =>
+    item.articleProductName.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
+
   const mostrarMas = () => {
     setVisibleCount(visibleCount + 10);
   };
 
-  const datosMostrar = data?.slice(0, visibleCount) || [];
-  const hayMas = data?.length > visibleCount;
+  const datosMostrar = datosFiltrados?.slice(0, visibleCount) || [];
+  const hayMas = datosFiltrados?.length > visibleCount;
 
   return (
     <>
       <h1>Listado de Piezas de Auto</h1>
-      {data && data.length > 0 ? (
+      
+     
+      <input
+        type="text"
+        placeholder="Buscar por nombre..."
+        value={searchTerm}
+        onChange={(e) => {
+          setSearchTerm(e.target.value);
+          setVisibleCount(10); 
+        }}
+      />
+      
+      {datosFiltrados.length > 0 ? (
         <>
           <ol>
             {datosMostrar.map((item) => (
@@ -42,13 +60,13 @@ const CarParts = () => {
             ))}
           </ol>
           {hayMas && (
-            <button onClick={mostrarMas} height="100px" width="100px">
+            <button onClick={mostrarMas}>
               Ver más
             </button>
           )}
         </>
       ) : (
-        <p>No hay piezas disponibles</p>
+        <p>No se encontraron piezas</p>
       )}
     </>
   );
